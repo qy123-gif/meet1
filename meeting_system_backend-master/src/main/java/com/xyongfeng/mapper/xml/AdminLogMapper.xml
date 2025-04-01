@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyongfeng.mapper.AdminLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xyongfeng.pojo.AdminLog">
+        <id column="id" property="id"/>
+        <result column="action_module_xq" property="actionModule"/>
+        <result column="action_user_id_xq" property="actionUserId"/>
+        <result column="action_url_xq" property="actionUrl"/>
+        <result column="action_content_xq" property="actionContent"/>
+        <result column="action_type_xq" property="actionType"/>
+        <result column="action_ip_xq" property="actionIp"/>
+        <result column="action_time_xq" property="actionTime"/>
+        <result column="action_success_xq" property="actionSuccess"/>
+
+    </resultMap>
+    <resultMap id="OneToOneResultMap" type="com.xyongfeng.pojo.AdminLog" extends="BaseResultMap">
+        <association property="actionUser" javaType="com.xyongfeng.pojo.Users">
+            <id column="userId" property="id"/>
+            <result column="uName" property="name"/>
+        </association>
+    </resultMap>
+    <select id="selectWithUser" resultMap="OneToOneResultMap">
+        SELECT
+        al.*,
+        u.id_xq as userId,
+        u.name_xq as uName
+        FROM
+        t_admin_log_xq as al,
+        t_users_xq as u
+        where
+        al.action_user_id_xq = u.id_xq
+        # 判断是否写了条件查询
+        <if test="ew.emptyOfWhere == false">
+            and ${ew.sqlSegment}
+        </if>
+        order by al.action_time_xq desc
+    </select>
+    <select id="selectWithUserById" resultMap="OneToOneResultMap">
+        SELECT al.*,
+               u.id_xq     as userId,
+               u.name_xq as uName
+        FROM t_admin_log_xq as al,
+             t_users_xq as u
+        where al.action_user_id_xq = u.id_xq
+          AND al.action_user_id_xq = ${userId}
+    </select>
+</mapper>

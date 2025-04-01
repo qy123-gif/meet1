@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyongfeng.mapper.UsersMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xyongfeng.pojo.Users">
+        <id column="id_xq" property="id"/>
+        <result column="name_xq" property="name"/>
+        <result column="username_xq" property="username"/>
+        <result column="password_xq" property="password"/>
+        <result column="telephone_xq" property="telephone"/>
+        <result column="email_xq" property="email"/>
+        <result column="headImage_xq" property="headImage"/>
+        <result column="isAdmin_xq" property="isAdmin"/>
+    </resultMap>
+    <resultMap id="FriendsAndChat" type="com.xyongfeng.pojo.FriendsAndChat">
+        <id column="id_xq" property="uid"/>
+        <result column="name_xq" property="name"/>
+        <result column="headImage_xq" property="headImage"/>
+        <collection property="chatMessage" ofType="com.xyongfeng.pojo.UsersFriendInform">
+            <result column="type_xq" property="type"/>
+            <result column="from_id_xq" property="fromId"/>
+            <result column="to_id_xq" property="toId"/>
+            <result column="content_xq" property="content"/>
+            <result column="state_xq" property="state"/>
+            <result column="send_time_xq" property="sendTime"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="selectFriendsAndChatPage" resultMap="FriendsAndChat">
+        SELECT u.id_xq,
+               u.name_xq,
+               u.headImage_xq,
+               ufi.type_xq,
+               ufi.from_id_xq,
+               ufi.to_id_xq,
+               ufi.content_xq,
+               ufi.state_xq,
+               ufi.send_time_xq
+        FROM t_users_friend_xq uf,
+             t_users_xq u,
+             t_users_friend_inform_xq ufi
+        WHERE (u.id_xq = uf.user_id2_xq
+                   AND
+               uf.user_id1_xq = ${ownerId}
+            OR
+               u.id_xq = uf.user_id1_xq
+                    AND
+               uf.user_id2_xq = ${ownerId})
+          AND ufi.type_xq = 1
+          AND (ufi.from_id_xq = ${ownerId} AND ufi.to_id_xq = u.id_xq OR ufi.to_id_xq = ${ownerId} AND ufi.from_id_xq = u.id_xq)
+        order by ufi.send_time_xq
+    </select>
+
+</mapper>
